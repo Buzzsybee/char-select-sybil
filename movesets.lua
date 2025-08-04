@@ -43,7 +43,7 @@ end
 
 ACT_SYBIL_WALKING = allocate_mario_action(ACT_FLAG_MOVING | ACT_GROUP_MOVING | ACT_FLAG_WATER_OR_TEXT)
 
-ACT_SYBIL_JUMP = allocate_mario_action(ACT_FLAG_AIR | ACT_GROUP_AIRBORNE | ACT_FLAG_MOVING)
+ACT_SYBIL_JUMP = allocate_mario_action(ACT_FLAG_AIR | ACT_GROUP_AIRBORNE | ACT_FLAG_MOVING | ACT_FLAG_CONTROL_JUMP_HEIGHT)
 
 ACT_SYBIL_FREEFALL = allocate_mario_action(ACT_FLAG_AIR | ACT_GROUP_AIRBORNE | ACT_FLAG_MOVING)
 
@@ -76,7 +76,7 @@ ACT_SYBIL_BOUNCE = allocate_mario_action(ACT_FLAG_AIR | ACT_GROUP_AIRBORNE | ACT
 ACT_SYBIL_AIR_BRAKE = allocate_mario_action(ACT_FLAG_AIR | ACT_GROUP_AIRBORNE | ACT_FLAG_MOVING)
 
 local function update_sybil_gravity(m)
-    m.vel.y = m.vel.y - 3
+    m.vel.y = m.vel.y - 4
 end
 
 local function update_sybil_rotation(m)
@@ -175,7 +175,7 @@ local function act_sybil_walk(m)
     end
 
     if (m.input & INPUT_Z_PRESSED ~= 0) then
-        return set_mario_action(m, ACT_CROUCH_SLIDE, 0);
+        return set_mario_action(m, ACT_SYBIL_SLIDE, 0);
     end
 
     m.actionState = 0;
@@ -185,20 +185,17 @@ local function act_sybil_walk(m)
 
     local step = (perform_ground_step(m))
     if step == GROUND_STEP_LEFT_GROUND then
-        set_mario_action(m, ACT_FREEFALL, 0);
+        set_mario_action(m, ACT_SYBIL_FREEFALL, 0);
         set_character_animation(m, CHAR_ANIM_GENERAL_FALL);
-        return
     elseif step == GROUND_STEP_NONE then
         anim_and_audio_for_walk(m);
         if (m.intendedMag - m.forwardVel > 16.0) then
             set_mario_particle_flags(m, PARTICLE_DUST, 0);
         end
-        return
     elseif step == GROUND_STEP_HIT_WALL then
         --push_or_sidle_wall(m, startPos);
         m.forwardVel = m.forwardVel - 5
         m.actionTimer = 0;
-        return
     end
 
     --check_ledge_climb_down(m);
@@ -207,9 +204,9 @@ local function act_sybil_walk(m)
 end
 
 local function act_sybil_jump(m)
-    if m.actionTimer == 0 then
+    if m.actionTimer < 5 and m.input & INPUT_A_DOWN ~= 0 then
         if m.actionArg == 0 then 
-            m.vel.y = 50
+            m.vel.y = 45
         end
     end
     if (check_kick_or_dive_in_air(m) ~= 0) then
@@ -221,7 +218,7 @@ local function act_sybil_jump(m)
     end
 
     play_mario_sound(m, SOUND_ACTION_TERRAIN_JUMP, 0);
-    common_air_action_step(m, ACT_JUMP_LAND, CHAR_ANIM_SINGLE_JUMP,
+    common_air_action_step(m, ACT_FREEFALL_LAND, CHAR_ANIM_SINGLE_JUMP,
                            AIR_STEP_CHECK_LEDGE_GRAB);
 
     update_sybil_rotation(m)
@@ -230,7 +227,27 @@ local function act_sybil_jump(m)
 end
 
 local function act_sybil_freefall(m)
+    local animation = 0;
 
+    if (m.input & INPUT_B_PRESSED ~= 0) then
+        --return set_mario_action(m, ACT_DIVE, 0);
+    end
+
+    if (m.input & INPUT_Z_PRESSED ~= 0) then
+        --return set_mario_action(m, ACT_GROUND_POUND, 0);
+    end
+
+    if m.actionArg == 0 then
+        animation = CHAR_ANIM_GENERAL_FALL;
+    elseif m.actionArg == 1 then
+        animation = CHAR_ANIM_FALL_FROM_SLIDE;
+    elseif m.actionArg == 2 then
+        animation = CHAR_ANIM_FALL_FROM_SLIDE_KICK;
+    end
+
+    common_air_action_step(m, ACT_FREEFALL_LAND, animation, AIR_STEP_CHECK_LEDGE_GRAB);
+    update_sybil_rotation(m)
+    return false;
 end
 
 local function act_sybil_attack(m)
@@ -291,6 +308,7 @@ end
 
 hook_mario_action(ACT_SYBIL_WALKING, act_sybil_walk)
 hook_mario_action(ACT_SYBIL_JUMP, {every_frame = act_sybil_jump, gravity = update_sybil_gravity})
+hook_mario_action(ACT_SYBIL_FREEFALL, {every_frame = act_sybil_freefall, gravity = update_sybil_gravity})
 
 local function update_sybil(m)
     local e = gExtrasStates[m.playerIndex]
@@ -319,6 +337,10 @@ local function before_sybil_action(m, nextAct)
 
     if jumpActs[nextAct] then
         return set_mario_action(m, ACT_SYBIL_JUMP, nextAct == ACT_TRIPLE_JUMP and 1 or 0)
+    end
+
+    if nextAct == ACT_FREEFALL then
+        return set_mario_action(m, ACT_SYBIL_FREEFALL, 0)
     end
 end
 
