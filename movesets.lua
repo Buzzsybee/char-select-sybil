@@ -81,7 +81,6 @@ end
 
 local function update_sybil_rotation(m)
     m.faceAngle.y = m.intendedYaw - approach_s32(convert_s16(m.intendedYaw - m.faceAngle.y), 0, 0xF00, 0xF00);
-    djui_chat_message_create(tostring(math.abs(m.faceAngle.y - m.intendedYaw)))
     m.forwardVel = m.forwardVel* (1 - math.abs(convert_s16(m.faceAngle.y - m.intendedYaw))/0x9000)
 end
 
