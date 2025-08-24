@@ -43,6 +43,8 @@ end
 
 ACT_SYBIL_WALKING = allocate_mario_action(ACT_FLAG_MOVING | ACT_GROUP_MOVING | ACT_FLAG_WATER_OR_TEXT)
 
+ACT_SYBIL_SKID = allocate_mario_action(ACT_FLAG_MOVING | ACT_GROUP_MOVING | ACT_FLAG_WATER_OR_TEXT)
+
 ACT_SYBIL_JUMP = allocate_mario_action(ACT_FLAG_AIR | ACT_GROUP_AIRBORNE | ACT_FLAG_MOVING | ACT_FLAG_CONTROL_JUMP_HEIGHT)
 
 ACT_SYBIL_FREEFALL = allocate_mario_action(ACT_FLAG_AIR | ACT_GROUP_AIRBORNE | ACT_FLAG_MOVING)
@@ -74,6 +76,8 @@ ACT_SYBIL_WALL_RIDE = allocate_mario_action(ACT_FLAG_AIR | ACT_GROUP_AIRBORNE | 
 ACT_SYBIL_BOUNCE = allocate_mario_action(ACT_FLAG_AIR | ACT_GROUP_AIRBORNE | ACT_FLAG_MOVING)
 
 ACT_SYBIL_AIR_BRAKE = allocate_mario_action(ACT_FLAG_AIR | ACT_GROUP_AIRBORNE | ACT_FLAG_MOVING)
+
+ACT_SYBIL_GLIDE = allocate_mario_action(ACT_FLAG_MOVING | ACT_GROUP_MOVING | ACT_FLAG_WATER_OR_TEXT) -- this is something else to work onnn
 
 local function update_sybil_gravity(m)
     m.vel.y = m.vel.y - 4
@@ -258,7 +262,7 @@ local function act_sybil_crouch(m)
 end
 
 local function act_sybil_slide(m)
-
+    
 end
 
 local function act_sybil_slide_fall(m)
