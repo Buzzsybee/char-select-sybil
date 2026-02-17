@@ -262,7 +262,27 @@ local function act_sybil_crouch(m)
 end
 
 local function act_sybil_slide(m)
-    
+    local e = gExtrasStates[m.playerIndex]
+    if e.actionTick == 0 then
+        set_mario_animation(m, CHAR_ANIM_SLIDE_KICK);
+    end
+
+    local step = perform_ground_step(m)
+    if step == GROUND_STEP_LEFT_GROUND then
+        set_mario_action(m, ACT_SYBIL_FREEFALL, 0);
+        set_character_animation(m, CHAR_ANIM_FALL_FROM_SLIDE_KICK);
+    end
+    mario_set_forward_vel(m, 48)
+    spawn_particle(PARTICLE_DUST);
+
+    if e.actionTick > 10 then
+        set_mario_animation(m, CHAR_ANIM_CROUCH_FROM_SLIDE_KICK);
+    end
+    if e.actionTick > 20 then
+        set_mario_action(m, ACT_SYBIL_WALKING, 0);
+    end
+
+    m.actionTimer = m.actionTimer + 1 
 end
 
 local function act_sybil_slide_fall(m)
@@ -312,6 +332,9 @@ end
 hook_mario_action(ACT_SYBIL_WALKING, act_sybil_walk)
 hook_mario_action(ACT_SYBIL_JUMP, {every_frame = act_sybil_jump, gravity = update_sybil_gravity})
 hook_mario_action(ACT_SYBIL_FREEFALL, {every_frame = act_sybil_freefall, gravity = update_sybil_gravity})
+-- hook_mario_action(ACT_SYBIL_ATTACK, act_sybil_attack)
+-- hook_mario_action(ACT_SYBIL_CROUCH, act_sybil_crouch)
+hook_mario_action(ACT_SYBIL_SLIDE, {every_frame = act_sybil_slide})
 
 local function update_sybil(m)
     local e = gExtrasStates[m.playerIndex]
