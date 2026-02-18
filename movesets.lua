@@ -263,26 +263,30 @@ end
 
 local function act_sybil_slide(m)
     local e = gExtrasStates[m.playerIndex]
+
     if e.actionTick == 0 then
         set_mario_animation(m, CHAR_ANIM_SLIDE_KICK);
+        set_anim_to_frame(m, 10);
     end
 
     local step = perform_ground_step(m)
     if step == GROUND_STEP_LEFT_GROUND then
         set_mario_action(m, ACT_SYBIL_FREEFALL, 0);
         set_character_animation(m, CHAR_ANIM_FALL_FROM_SLIDE_KICK);
+    elseif step == GROUND_STEP_NONE then
+        if m.actionTimer < 20 then
+            mario_set_forward_vel(m, 48)
+        end
     end
-    mario_set_forward_vel(m, 48)
-    spawn_particle(PARTICLE_DUST);
+    spawn_particle(PARTICLE_VERTICALaaa_STAR);
 
-    if e.actionTick > 10 then
-        set_mario_animation(m, CHAR_ANIM_CROUCH_FROM_SLIDE_KICK);
-    end
-    if e.actionTick > 20 then
+    if m.actionTimer > 10 then set_mario_animation(m, CHAR_ANIM_CROUCH_FROM_SLIDE_KICK); end
+    if m.actionTimer > 20 then
         set_mario_action(m, ACT_SYBIL_WALKING, 0);
     end
 
     m.actionTimer = m.actionTimer + 1 
+    return false;
 end
 
 local function act_sybil_slide_fall(m)
@@ -345,6 +349,7 @@ local function update_sybil(m)
         e.prevFrameAction = m.action
         e.actionTick = 0
     end
+    djui_chat_message_create(tostring(e.actionTick))
 end
 
 local jumpActs = {
