@@ -278,7 +278,7 @@ local function act_sybil_slide(m)
             mario_set_forward_vel(m, 48)
         end
     end
-    spawn_particle(PARTICLE_VERTICALaaa_STAR);
+    spawn_particle(PARTICLE_DUST);
 
     if m.actionTimer > 10 then set_mario_animation(m, CHAR_ANIM_CROUCH_FROM_SLIDE_KICK); end
     if m.actionTimer > 20 then
